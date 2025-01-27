@@ -5,14 +5,28 @@ extension Crossword {
         self.init(rows: rows, columns: columns, elementGenerator: { row, col in Cell(pos: Pos(row: row, column: col)) })
     }
     
-    init(initString:[String]) {
-        let rows = initString.count
-        let columns = initString[0].count
+//    init(initString:[String]) {
+//        let rows = initString.count
+//        let columns = initString[0].count
+//        self.init(rows: rows, columns: columns) {
+//            row, col in
+//                Cell(pos: Pos(row: row, column: col), configChar: initString[row][col])
+//        }
+//    }
+    
+    
+    init(initString:String) {
+        let initArray = initString.components(separatedBy: "|").filter { !$0.isEmpty }
+        
+        let rows = initArray.count
+        let columns = initArray[0].count
+        
         self.init(rows: rows, columns: columns) {
             row, col in
-                Cell(pos: Pos(row: row, column: col), configChar: initString[row][col])
+                return Cell(pos: Pos(row: row, column: col), configChar: initArray[row][col])
         }
     }
+    
     
     mutating func reset() {
         for rowIndex in elements.indices {

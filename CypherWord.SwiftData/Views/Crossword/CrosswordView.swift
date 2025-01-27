@@ -55,7 +55,7 @@ struct CrosswordView: View {
                                     }
                                 }
                             }
-//
+
                             return CellView(letter:letter,
                                             number: number,
                                             selected:number == selectedNumber,

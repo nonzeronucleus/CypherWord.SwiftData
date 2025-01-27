@@ -44,45 +44,21 @@ struct RootView: View {
     
     var body: some View {
         ZStack {
-             if selectedLevel == nil {
+            if let selectedLevel {
+                if selectedLevel.isLevel {
+                    GameView(selectedLevel: $selectedLevel)
+                        .transition(.move(edge: .trailing))
+                }
+                else {
+                    EditorView(selectedLevel: $selectedLevel)
+                        .transition(.move(edge: .trailing)) // Slide in from the right
+                }
+            }
+            else {
                  TabsView(selectedLevel: $selectedLevel)
                      .transition(.move(edge: .leading)) // Slide in from the left
-             } else {
-                 EditorView(selectedLevel: $selectedLevel)
-                     .transition(.move(edge: .trailing)) // Slide in from the right
              }
          }
-         .animation(.easeInOut(duration: 0.4), value: selectedLevel) // Animate the transition
+//         .animation(.easeInOut(duration: 0.4), value: selectedLevel) // Animate the transition
      }
-//        NavigationStack {
-//            if selectedLevel != nil {
-//                // Navigate to ChildViewB when selectedLevel is set
-//                ChildViewB(selectedLevel: $selectedLevel)
-//            } else {
-//                // Display ChildViewA when selectedLevel is nil
-//                TabsView(selectedLevel: $selectedLevel)
-//            }
-//        }
-//    }
-
-        
-//        NavigationStack(path: $navigationPath) {
-////            VStack(spacing: 40) {
-////                ForEach(screens, id: \.self) { screen in
-////                    NavigationLink(value: screen) {
-////                        Text(screen.rawValue)
-////                    }
-////                }
-////            }
-//            .navigationTitle("Main View")
-//            .navigationDestination(for: NavigationDestinations.self) { screen in
-//                switch screen {
-//                    case .List:
-//                        TabsView(selectedLevel: $selectedLevel)
-//                    case .Details:
-//                        ChildViewB(selectedLevel: $selectedLevel)
-//                }
-//            }
-//        }
-//    }
 }
