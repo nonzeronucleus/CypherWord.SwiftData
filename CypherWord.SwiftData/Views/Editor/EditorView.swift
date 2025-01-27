@@ -2,8 +2,12 @@ import SwiftUI
 
 struct EditorView: View {
     @Binding var selectedLevel : Level?
+    @State var showingConfirmation: Bool = false
+    @State var backgroundColor: Color = .white
     @State var crossword : Crossword
+    @State var hasChanged: Bool = false
     @Environment(\.modelContext) private var modelContext
+    
 
     init(selectedLevel: Binding<Level?>) {
         self._selectedLevel = selectedLevel
@@ -17,11 +21,11 @@ struct EditorView: View {
             }
         }
         
-        if crossword == nil {
-            crossword = Crossword(rows: 15, columns: 15)
-        }
+        self.crossword = crossword ?? Crossword(rows: 15, columns: 15)
         
-        self.crossword = crossword!
+        
+        //||  Crossword(rows: 15, columns: 15)
+        
     }
 
     var body: some View {
@@ -37,23 +41,49 @@ struct EditorView: View {
                 }
                 
                 VStack {
-                    CrosswordView(grid: crossword, viewMode: .actualValue, performAction: { id in toggleCell(id: id) })
-                        .frame(width: geometry.size.width * 0.98, height: geometry.size.width * 0.98) // Lock height to 75% of the screen
-                        .border(.gray)
-                        .padding(.top,10)
+                    ZStack {
+                        CrosswordView(grid: crossword, viewMode: .actualValue, performAction: { id in toggleCell(id: id) })
+                            .frame(width: geometry.size.width * 0.98, height: geometry.size.width * 0.98) // Lock height to 75% of the screen
+                            .border(.gray)
+                            .padding(.top,10)
+                    }
 
-                    Spacer() // Push the rest down
+                    Spacer()
                 }
-                
-                
-                if let selectedLevel {
-                    Text("Selected Level: \(selectedLevel.levelNumber)")
+                .confirmationDialog("Save changes?",
+                                    isPresented: $showingConfirmation) {
+                    Text("Save Changes?")
+                    Button("Save and exit", role: .none) {
+                        save()
+                        exit()
+                    }
+                    Button("Exit without saving", role: .destructive) {
+                        exit()
+                    }
                 }
                 
                 Spacer()
                 
-                Button("Go Back") {
-                    exit()
+                HStack {
+                    Spacer()
+                    
+                    Button("Go Back") {
+                        handleBackButtonTap()
+                    }
+                    
+                    Spacer()
+
+                    Button("Save") {
+                        save()
+                    }
+                    
+                    Spacer()
+
+                    Button("Generate") {
+                        generate()
+                    }
+                    
+                    Spacer()
                 }
             }
         }
@@ -73,21 +103,49 @@ extension EditorView {
                     cell.toggle()
                 }
             }
+            hasChanged = true
+        }
+    }
+    
+    func handleBackButtonTap() {
+        if hasChanged {
+            showingConfirmation = true
+        }
+        else {
+            exit()
         }
     }
     
     func exit() {
+        showingConfirmation = false
+        selectedLevel = nil
+//        let transformer = CrosswordTransformer()
+//        
+//        if let levelGridText = transformer.transformedValue(crossword) as? String, let selectedLevel {
+//            selectedLevel.levelGridText = levelGridText
+//            self.selectedLevel = nil
+//            try? modelContext.save()
+//        }
+    }
+    
+    func save() {
         let transformer = CrosswordTransformer()
         
         if let levelGridText = transformer.transformedValue(crossword) as? String, let selectedLevel {
             selectedLevel.levelGridText = levelGridText
             self.selectedLevel = nil
             try? modelContext.save()
+            hasChanged = false
         }
-
-//        let transformer = CrosswordTransformer()
-//        selectedLevel = nil
-//        print("\(String(describing: transformer.transformedValue(crossword)))")
-//        selectedLevel?.levelGridText =
+    }
+    
+    func generate() {
+        let populator = CrosswordPopulator(crossword: crossword)
+        
+        let populated = populator.populateCrossword()
+        
+        crossword = populated.crossword
+        
+//        letterValues = populated.characterIntMap//CharacterIntMap(populated.characterIntMap)
     }
 }
