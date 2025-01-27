@@ -41,48 +41,44 @@ struct LevelListView: View {
             Spacer()
             
             HStack {
-                Button("Add " + (isLevel ? "Level":"Layout")) {
-                    let newLevel = Level(id: UUID(), levelNumber: nextLevelNumber(), levelGridText: "", isLevel: isLevel)
-                    modelContext.insert(newLevel)
-                    try? modelContext.save()
+                if isLevel {
+                    Button("Export Levels") {
+                        let exporter = LevelExporter(modelContext: modelContext)
+                        exporter.exportToJSON()
+                    }
+                    Button("Import Levels") {
+                        let exporter = LevelExporter(modelContext: modelContext)
+//                        exporter.exportToJSON()
+                        exporter.importFromJSON()
+                    }
+
                 }
-                .padding()
+                else {
+                    Button("Add Layout") {
+                        let creator = LevelCreator(isLevel: isLevel, modelContext: modelContext)
+                        creator.createLevel()
+                    }
+                    .padding()
+                }
                 
-                Button("Reset") {
+                Button("Delete "+(isLevel ? "Levels":"Layouts")) {
                     do {
-                        try modelContext.delete(model: Level.self)
-                        try? modelContext.save()
+                        let levelDeleter = LevelDeleter(modelContext: modelContext, isLevel: isLevel)
+                        
+                        try levelDeleter.deleteLevels()
+//                        try modelContext.delete(model: Level.self)
+//                        try? modelContext.save()
                     }
                     catch {
                         print(error)
                     }
                 }
                 .padding()
-                
-                
             }
         }
     }
 }
     
-extension LevelListView {
-    func nextLevelNumber() -> Int {
-        let fetchRequest = FetchDescriptor<Level>(
-            predicate: #Predicate { $0.isLevel == isLevel },
-            sortBy: [SortDescriptor(\.levelNumber, order: .reverse)])
-        
-        do {
-            if let highestLevel = try modelContext.fetch(fetchRequest).first {
-                return highestLevel.levelNumber + 1
-            } else {
-                return 1 // Default to 1 if no levels exist
-            }
-        } catch {
-            print("Error fetching levels: \(error)")
-            return 1
-        }
-    }
-}
 
 //#Preview {
 //    var selectedLevel:Level? = nil

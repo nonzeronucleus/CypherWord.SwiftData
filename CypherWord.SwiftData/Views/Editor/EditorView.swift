@@ -5,8 +5,10 @@ struct EditorView: View {
     @State var showingConfirmation: Bool = false
     @State var backgroundColor: Color = .white
     @State var crossword : Crossword
+    @State var letterValues:CharacterIntMap?
     @State var hasChanged: Bool = false
     @Environment(\.modelContext) private var modelContext
+    @State var isPopulated: Bool = false
     
 
     init(selectedLevel: Binding<Level?>) {
@@ -22,10 +24,6 @@ struct EditorView: View {
         }
         
         self.crossword = crossword ?? Crossword(rows: 15, columns: 15)
-        
-        
-        //||  Crossword(rows: 15, columns: 15)
-        
     }
 
     var body: some View {
@@ -119,24 +117,30 @@ extension EditorView {
     func exit() {
         showingConfirmation = false
         selectedLevel = nil
-//        let transformer = CrosswordTransformer()
-//        
-//        if let levelGridText = transformer.transformedValue(crossword) as? String, let selectedLevel {
-//            selectedLevel.levelGridText = levelGridText
-//            self.selectedLevel = nil
-//            try? modelContext.save()
-//        }
     }
     
     func save() {
+        if isPopulated {
+            saveLevel()
+        }
+        else {
+            saveLayout()
+        }
+    }
+    
+    func saveLayout() {
         let transformer = CrosswordTransformer()
         
         if let levelGridText = transformer.transformedValue(crossword) as? String, let selectedLevel {
             selectedLevel.levelGridText = levelGridText
-            self.selectedLevel = nil
             try? modelContext.save()
             hasChanged = false
         }
+    }
+    
+    func saveLevel() {
+        let creator = LevelCreator(isLevel: true, modelContext: modelContext, crossword: crossword)
+        creator.createLevel()
     }
     
     func generate() {
@@ -146,6 +150,7 @@ extension EditorView {
         
         crossword = populated.crossword
         
-//        letterValues = populated.characterIntMap//CharacterIntMap(populated.characterIntMap)
+        letterValues = populated.characterIntMap
+        isPopulated = true
     }
 }
