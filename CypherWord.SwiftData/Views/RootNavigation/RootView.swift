@@ -39,6 +39,7 @@ import SwiftUI
 
 struct RootView: View {
     @State var selectedLevel : Level? = nil
+    @State var selection:Tab = .level
 
 //    @State private var navigationPath = NavigationPath()
     
@@ -55,7 +56,7 @@ struct RootView: View {
                 }
             }
             else {
-                 TabsView(selectedLevel: $selectedLevel)
+                TabsView(selectedLevel: $selectedLevel, selection: $selection)
                      .transition(.move(edge: .leading)) // Slide in from the left
              }
          }

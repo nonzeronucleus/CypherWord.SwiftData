@@ -10,9 +10,17 @@ enum Tab: String, CaseIterable, Identifiable {
 
 struct TabsView: View {
     @Binding var selectedLevel:Level?
-    @State var selection = Tab.layout
+    @Binding var selection:Tab
+
+    init(selectedLevel: Binding<Level?>, selection:  Binding<Tab>) {
+        self._selection = selection
+        self._selectedLevel = selectedLevel
+    }
 
     var body: some View {
+        
+        Text("\(selection)")
+        
         TabView(selection: $selection) {
             LevelListView(isLevel: true, selectedLevel:$selectedLevel)
                 .tabItem {

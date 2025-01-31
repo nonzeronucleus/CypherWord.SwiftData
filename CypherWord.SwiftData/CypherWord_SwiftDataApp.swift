@@ -12,8 +12,6 @@ import CoreData
 
 @main
 struct CypherWord_SwiftDataApp: App {
-
-    
     var sharedModelContainer: ModelContainer = {
         var cancellable: AnyCancellable?
 

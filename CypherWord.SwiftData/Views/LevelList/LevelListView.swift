@@ -41,19 +41,15 @@ struct LevelListView: View {
             Spacer()
             
             HStack {
-                if isLevel {
-                    Button("Export Levels") {
-                        let exporter = LevelExporter(modelContext: modelContext)
-                        exporter.exportToJSON()
-                    }
-                    Button("Import Levels") {
-                        let exporter = LevelExporter(modelContext: modelContext)
-//                        exporter.exportToJSON()
-                        exporter.importFromJSON()
-                    }
-
+                Button("Export") {
+                    let exporter = LevelExporter(modelContext: modelContext)
+                    exporter.exportToJSON(isLevel:isLevel)
                 }
-                else {
+                Button("Import") {
+                    let exporter = LevelExporter(modelContext: modelContext)
+                    exporter.importFromJSON(isLevel:isLevel)
+                }
+                if !isLevel {
                     Button("Add Layout") {
                         let creator = LevelCreator(isLevel: isLevel, modelContext: modelContext)
                         creator.createLevel()

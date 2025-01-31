@@ -4,6 +4,10 @@ import CoreData
 class LevelExporter {
     var modelContext: ModelContext
     
+    init(modelContext: ModelContext) {
+        self.modelContext = modelContext
+    }
+    
     private static func filePath() throws -> URL {
         try FileManager.default.url(for: .documentDirectory,
                                     in: .userDomainMask,
@@ -11,33 +15,27 @@ class LevelExporter {
                                     create: false)
     }
     
-    init(modelContext: ModelContext) {
-        self.modelContext = modelContext
-    }
     
-    func fetchLevels() -> [Level] {
-        let fetchDescriptor = FetchDescriptor<Level>(
-            predicate: #Predicate { $0.isLevel == true },
-            sortBy: [SortDescriptor(\.levelNumber, order: .forward)]
-        )
-        
-        do {
-            return try modelContext.fetch(fetchDescriptor)
-        } catch {
-            print("Failed to fetch entities: \(error)")
-            return []
+    
+    func getTileName(isLevel:Bool) -> String {
+        switch(isLevel) {
+            case true:
+                return "Level.json"
+            case false:
+                return "Layout.json"
         }
     }
     
-    func exportToJSON() {
-        let levels = fetchLevels()
+
+    func exportToJSON(isLevel:Bool) {
+        let levels = fetchLevels(isLevel: isLevel)
         
         let encoder = JSONEncoder()
         encoder.outputFormatting = .prettyPrinted
         encoder.dateEncodingStrategy = .iso8601
         
         do {
-            let path = try LevelExporter.filePath() .appendingPathComponent("levels.json")
+            let path = try LevelExporter.filePath() .appendingPathComponent(getTileName(isLevel:isLevel))
             
             print(path)
             
@@ -50,12 +48,27 @@ class LevelExporter {
         }
     }
     
-    func importFromJSON() {
+    private func fetchLevels(isLevel:Bool) -> [Level] {
+        let fetchDescriptor = FetchDescriptor<Level>(
+            predicate: #Predicate { $0.isLevel == isLevel },
+            sortBy: [SortDescriptor(\.levelNumber, order: .forward)]
+        )
+        
+        do {
+            return try modelContext.fetch(fetchDescriptor)
+        } catch {
+            print("Failed to fetch entities: \(error)")
+            return []
+        }
+    }
+    
+    
+    func importFromJSON(isLevel:Bool) {
         let decoder = JSONDecoder()
         decoder.dateDecodingStrategy = .iso8601
         
         do {
-            let path = try LevelExporter.filePath() .appendingPathComponent("levels.json")
+            let path = try LevelExporter.filePath() .appendingPathComponent(getTileName(isLevel: isLevel))
             
             let jsonData = try Data(contentsOf: path)
             
